@@ -1,86 +1,62 @@
-      module complex_mod
+      program jit101
 !
-!     This module provides a custom complex variable type.
-!
-      implicit none
-      type myComplex
-        private
-        real::realPart,imaginaryPart
-      end type myComplex
-
-      contains
-
-      function setMyComplex(realPart,imaginaryPart) result(z)
-!
-!     This function is used to set the value of a MyComplex object.
-!
-!
-!     Variable Declarations
+!     This is a just-in-time program to demonstrate subroutines and a few other
+!     things we've covered thus far.
 !
       implicit none
-      real,intent(in)::realPart,imaginaryPart
-      type(myComplex)::z
+      real::x,y
+      real,parameter::m=1.0,b=-12.0
+      real,external::lineValueFunction
 !
-!     Do the work...
+!     Ask the user for the value of x. Then, evaluate the function value
+!     (y=mx+b) and print it out.
 !
-      z%realPart = realPart
-      z%imaginaryPart = imaginaryPart
+      write(*,*)' What is the value of x?'
+      read(*,*) x
+      write(*,*)' m = ',m
+      write(*,*)' b = ',b
+      write(*,*)' x = ',x
+
+!hph+
+!      y = m*x+b
+      call lineValue(m,b,x,y)
+      y = lineValueFunction(m,b,x)
+      write(*,*)' mx+b = ',m*x+b
+      write(*,*)' The value from the function is ',lineValueFunction(m,b,x)
+!hph-
+
+      write(*,*)' The function value is y = ',y
+!
+      end program jit101
+
+
+      subroutine lineValue(m,b,x,y)
+!
+!     This subroutine calculates the value of the line y=mx+b.
+!
+      implicit none
+      real,intent(in)::m,b,x
+      real,intent(out)::y
+!
+!     Do the work.
+!
+      y = m*x + b
 !
       return
-      end function setMyComplex
+      end subroutine lineValue
 
 
-      subroutine printMyComplex(z,zName,iOut)
+      function lineValueFunction(m,b,x) result(y)
 !
-!     This subroutine prints the value of a myComplex variable, z.
-!
-!
-!     Variable Declarations
+!     This function calculates the value of the line y=mx+b.
 !
       implicit none
-      type(myComplex),intent(in)::z
-      character(len=*),optional::zName
-      integer,optional::iOut
-      integer::myIOut
+      real,intent(in)::m,b,x
+      real::y
 !
-!     Format Statements
+!     Do the work.
 !
- 1000 format(1x,a,f12.5,'  + ',f12.5,' i')
-!
-!     Print z.
-!
-      if(present(iOut)) then
-        myIOut = iOut
-      else
-        myIOut = 6
-      endIf
-      if(present(zName)) then
-        write(myIOut,1000) TRIM(zName),z%realPart,z%imaginaryPart
-      else
-        write(myIOut,1000) ' z = ',z%realPart,z%imaginaryPart
-      endIf
+      y = m*x + b
 !
       return
-      end subroutine printMyComplex
-
-      end module complex_mod
-
-
-      program complex
-      use complex_mod
-!
-!     This program is used to test the complex_mod module.
-!
-!
-!     Variable Declarations
-!
-      implicit none
-      type(myComplex)::z1
-!
-!     Set z1 to a value and then print it out.
-!
-      z1 = setMyComplex(2.5,10.2)
-      call printMyComplex(z1,'z1 =')
-!
-      write(*,*)' ALL DONE!!!'
-      end program complex
+      end function lineValueFunction
